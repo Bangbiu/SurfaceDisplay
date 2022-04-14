@@ -8,7 +8,7 @@ import { GrObject } from "./libs/CS559-Framework/GrObject.js";
 
 const multiSlider = /** @type {HTMLInputElement} */ (document.getElementById("multiSlider"));
 const fileSlider = /** @type {HTMLInputElement} */ (document.getElementById("fileSlider"));
-
+const precSlider = /** @type {HTMLInputElement} */ (document.getElementById("precSlider"));
 let world = new GrWorld({groundplanesize:5, groundplane:false});
 
 
@@ -81,6 +81,7 @@ F.readMatrix("parallel_z=-5.txt",13, 1, function(mat) {
 
 
 multiSlider.oninput = updateSurface;
+precSlider.oninput = updateSurface;
 fileSlider.oninput = function() {
     matrix = matrices[Number(fileSlider.value)];
     updateSurface();
@@ -88,7 +89,7 @@ fileSlider.oninput = function() {
 
 function updateSurface() {
     if (matrix != undefined) {
-        surf.update(matrix,0.05,8,Number(multiSlider.value));
+        surf.update(matrix,0.05,Math.round(50/Number(precSlider.value)),Number(multiSlider.value));
     }
 }
 
