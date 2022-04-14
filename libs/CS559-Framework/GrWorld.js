@@ -113,8 +113,8 @@ export class GrWorld {
                 );
 
         // width and height are tricky, since they can come from many places
-        let width = 600;
-        let height = 400;
+        let width = 600*1.5;
+        let height = 400*1.5;
         // if the renderer was given, get its DOM
         if ("renderer" in params) {
             width = params.renderer.domElement.width;
