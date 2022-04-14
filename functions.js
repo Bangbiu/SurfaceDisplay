@@ -153,22 +153,51 @@ function isNumber(char) {
 export function readMatrix(filePath,mag=14,multi=10,finish) {
     /** @type {Array<Array<number>>}*/
     let mat = [];
-    fetch(filePath)
-    .then(response => response.text())
-    .then(text => {
-        text.split(/\r?\n/).forEach(lines => {
-            lines = lines.trim();
-            if (!lines.startsWith("0")) return;
-            /** @type {Array<number>}*/
-            let row = [];
-            lines.split(" ").forEach(num => {
-                let tens = Number(num.substring(num.indexOf("e")+1));
-                let coef = Number(num.substring(0,num.indexOf("e")));
-                tens += mag;
-                row.push(Number(coef+"e"+tens)*multi);
-            });
-            mat.push(row);
+    try {
+        fetch(filePath)
+        .then(response => response.text())
+        .then(text => {
+            text.split(/\r?\n/).forEach(lines => {
+                lines = lines.trim();
+                if (!lines.startsWith("0")) return;
+                /** @type {Array<number>}*/
+                let row = [];
+                lines.split(" ").forEach(num => {
+                    let tens = Number(num.substring(num.indexOf("e")+1));
+                    let coef = Number(num.substring(0,num.indexOf("e")));
+                    tens += mag;
+                    row.push(Number(coef+"e"+tens)*multi);
+                });
+                mat.push(row);
+            })
+            finish(mat);
         })
-        finish(mat);
-    })
+    } catch (e) {
+        console.log(e);
+        finish(undefined);
+        return undefined;
+    }
+}
+/**
+ * 
+ * @param {Array<string>} filePaths 
+ * @param {number} mag 
+ * @param {number} multi 
+ * @param {Function} finish 
+ */
+export function readMatList(filePaths,mag=14,multi=10,finish) {
+    let count = 0;
+    /** @type {Array<Array<Array<number>>>} */
+    let mats = [];
+    filePaths.forEach(path => {
+        readMatrix(path,mag,multi,callback);
+    });
+
+    function callback(mat) {
+        count++;
+        if (mat!=undefined && mat.length > 1) mats.push(mat);
+        if (count >= filePaths.length) {
+            finish(mats);
+        }
+    }
 }

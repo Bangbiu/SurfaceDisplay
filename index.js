@@ -9,6 +9,7 @@ import { GrObject } from "./libs/CS559-Framework/GrObject.js";
 const multiSlider = /** @type {HTMLInputElement} */ (document.getElementById("multiSlider"));
 const fileSlider = /** @type {HTMLInputElement} */ (document.getElementById("fileSlider"));
 const precSlider = /** @type {HTMLInputElement} */ (document.getElementById("precSlider"));
+const fileAnimate = /** @type {HTMLInputElement} */ (document.getElementById("fileAnimate"));
 let world = new GrWorld({groundplanesize:5, groundplane:false});
 
 
@@ -68,16 +69,29 @@ let surf = new GrSurface(F.randomMatrix(2,2,2));
 let matrix = undefined
 /** @type {Array<Array<Array<number>>>} */
 let matrices = [];
-F.readMatrix("parallel_z=-5.txt",13, 1, function(mat) {
-    matrix = mat; 
-    matrices.push(mat);
-    F.readMatrix("parallel_z=-10.txt",13, 1, function(mat) {
-        matrices.push(mat);
-        updateSurface();
-        world.add(surf);
-    })
 
+let filePaths = [];
+for (let index = 5; index <= 110; index+=5) {
+    filePaths.push("./data/parallel_z=-"+ index +".txt");
+}
+
+F.readMatList(filePaths,13,1,function(mats) {
+    matrices = mats;
+    matrix = matrices[0];
+    updateSurface();
+    fileSlider.max = String(mats.length-1);
+    world.add(surf);
 });
+
+let handle;
+fileAnimate.oninput = function() {
+    if (fileAnimate.checked) 
+        handle = window.requestAnimationFrame(updateFigureByIndex.bind(this,Number(fileSlider.value)));
+    else {
+        window.cancelAnimationFrame(handle);
+    }
+        
+}
 
 
 multiSlider.oninput = updateSurface;
@@ -87,12 +101,19 @@ fileSlider.oninput = function() {
     updateSurface();
 }
 
+function updateFigureByIndex(index,timestamp) {
+    let cur = Number(fileSlider.value);
+    if (cur != Math.floor(index)) {
+        fileSlider.value = String(index%matrices.length);
+        fileSlider.oninput(undefined);
+    }
+    handle = requestAnimationFrame(updateFigureByIndex.bind(this,index+0.3));
+}
+
 function updateSurface() {
     if (matrix != undefined) {
         surf.update(matrix,0.05,Math.round(50/Number(precSlider.value)),Number(multiSlider.value));
     }
 }
-
-
 world.go();
 
